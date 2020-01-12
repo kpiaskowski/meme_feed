@@ -6,6 +6,7 @@ from django.http import HttpResponse
 import datetime
 import pickle
 
+from django.shortcuts import render
 from django.utils.crypto import random
 
 from manage import DEFAULT_SETTINGS_MODULE
@@ -36,7 +37,7 @@ def load_vars(filename='temp_vars.yml'):
     :param filename: name of vars file.
     :return hour, post_id
     """
-    with open("temp_vars.yml", 'r') as stream:
+    with open(filename, 'r') as stream:
         temp_vars = yaml.safe_load(stream)
 
     return temp_vars['prev_hour'], temp_vars['prev_id']
@@ -58,51 +59,71 @@ def update_count_and_save(meme):
     meme.save()
 
 
-def index(request):
-    return HttpResponse("Hello, world. You're at the polls index.")
+def am_or_pm(hour):
+    """Returns 24h hour in 12h format and hour specifier (am or pm)"""
+    if hour >= 0 and hour <= 12:
+        return hour, 'AM'
+    else:
+        return hour - 12, 'PM'
 
 
 # pseudo config todo
 start_hour = 8  # todo
-end_hour = 18  # todo
+end_hour = 12  # todo
 valid_days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']
 
 now = datetime.datetime.now()
 
 day = now.strftime("%A")  # todo
-day = 'Tuesday'  # todo
+day = 'Thursday'  # todo
 
-# applicable on Saturday and Sunday
-if day not in valid_days:
-    save_vars(0, 'None')
 
-# if Monday to Friday
-else:
-    # night time
-    if now.hour < start_hour:
+def index(request):
+    # applicable on Saturday and Sunday
+    if day not in valid_days:
         save_vars(0, 'None')
+        next_hour, hour_type = am_or_pm(start_hour)
+        return render(request, 'no_display.html', {'next_day': valid_days[0],
+                                                   'next_hour': next_hour,
+                                                   'hour_type': hour_type})
 
-    # late afternoon
-    elif now.hour >= end_hour:
-        next_day = valid_days[(valid_days.index(day) + 1) % len(valid_days)]
-        save_vars(0, 'None')
-
-    # valid display hours
+    # if Monday to Friday
     else:
-        meme = None
-        # if some memes have been already shown
-        if os.path.exists('temp_vars.yml'):
-            prev_hour, prev_id = load_vars()
+        # night time to early morning
+        if now.hour < start_hour:
+            save_vars(0, 'None')
+            next_hour, hour_type = am_or_pm(start_hour)
+            return render(request, 'no_display.html', {'next_day': day,
+                                                       'next_hour': next_hour,
+                                                       'hour_type': hour_type})
 
-            # load the same meme as before if hour hasn't changed
-            if not prev_hour < now.hour:
-                memes = Meme.objects.all().filter(valid=True).filter(post_id=prev_id)
-                if memes:
-                    meme = memes[0]
+        # late afternoon
+        elif now.hour >= end_hour:
+            next_day = valid_days[(valid_days.index(day) + 1) % len(valid_days)]
+            save_vars(0, 'None')
+            next_hour, hour_type = am_or_pm(start_hour)
+            return render(request, 'no_display.html', {'next_day': next_day,
+                                                       'next_hour': next_hour,
+                                                       'hour_type': hour_type})
 
-        # in all other cases (no temp_vars file, new hour)
-        if not meme:
-            meme = random_meme()
+        # valid display hours
+        else:
+            meme = None
+            # if some memes have been already shown
+            if os.path.exists('temp_vars.yml'):
+                prev_hour, prev_id = load_vars()
 
-        update_count_and_save(meme)
-        save_vars(now.hour, meme.post_id)
+                # load the same meme as before if hour hasn't changed
+                if not prev_hour < now.hour:
+                    memes = Meme.objects.all().filter(valid=True).filter(post_id=prev_id)
+                    if memes:
+                        meme = memes[0]
+
+            # in all other cases (no temp_vars file, new hour)
+            if not meme:
+                meme = random_meme()
+
+            update_count_and_save(meme)
+            save_vars(now.hour, meme.post_id)
+
+    return HttpResponse("Hello, world. You're at the polls index.")

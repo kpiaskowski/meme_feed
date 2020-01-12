@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Meme Feed</title>
+	<style>
+		html, body {
+			margin: 0;
+			padding: 0;
+			height: 100%;
+			width: 100%;
+		}
+
+		body {
+			background: linear-gradient(to right, #FB3174, #FD9F60);
+		}
+
+		#full-size {
+			height: 100%;
+			width: 100%;
+			overflow: hidden; /* or overflow:auto; if you want scrollbars */
+		}
+
+		.one {
+			width: 30%;
+			height: 96%;
+			margin: 1%;
+			float: left;
+		}
+
+		.two {
+			margin: 1%;
+			height: 96%;
+		}
+
+		img {
+			background: green;
+
+			position: absolute;
+			top: 50%;
+			left: 65%;
+
+			transform: translate(-50%, -50%);
+
+			border-radius: 4%;
+			box-shadow: 0 30px 60px 0 rgba(0, 0, 0, 0.8), 0 30px 40px 0 rgba(0, 0, 0, 0.8);
+		}
+
+		h1{
+			font-size: 4em;
+			position: absolute;
+			top: 38%;
+			left: 16%;
+			transform: translate(-50%, -50%);
+		}
+
+		h2{
+			font-size: 3em;
+			position: absolute;
+			top: 50%;
+			left: 16%;
+			transform: translate(-50%, -50%);
+		}
+
+		h1, h2 {
+			color: #ebebeb;
+			font-family: Avantgarde, TeX Gyre Adventor, URW Gothic L, sans-serif;
+			text-shadow: 2px 2px grey;
+			font-weight: 200;
+		}
+
+
+	</style>
+
+
+</head>
+<body onload="fitImage()">
+
+<div id="full-size">
+	<div class="one">
+		<h1>Next meme</h1>
+		<h2>at 16PM</h2>
+	</div>
+	<div class="two">
+		<img class="meme-photo" src="meme2.png">
+	</div>
+</div>
+
+<script>
+    function fitImage() {
+        var img = document.getElementsByTagName('img')[0];
+        var imgWidth = parseInt(img.naturalWidth);
+        var imgHeight = parseInt(img.naturalHeight);
+
+        // portrait-like image
+        if (imgHeight >= imgWidth){
+            document.getElementsByTagName('img')[0].style.width = 'auto';
+            document.getElementsByTagName('img')[0].style.height = '90%';
+        }
+        else{
+            document.getElementsByTagName('img')[0].style.height = 'auto';
+            document.getElementsByTagName('img')[0].style.width = '60%';
+        }
+    }
+</script>
+
+</body>
+</html>

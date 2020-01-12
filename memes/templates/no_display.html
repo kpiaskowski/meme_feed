@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Meme Feed</title>
+	<style>
+		html, body {
+			margin: 0;
+			padding: 0;
+			height: 100%;
+			width: 100%;
+		}
+
+		body {
+			background: linear-gradient(to right, #FB3174, #FD9F60);
+		}
+
+		#full-size {
+			height: 100%;
+			width: 100%;
+			overflow: hidden; /* or overflow:auto; if you want scrollbars */
+		}
+
+		h1 {
+			font-size: 4em;
+			position: absolute;
+			top: 38%;
+			left: 50%;
+			transform: translate(-50%, -50%);
+		}
+
+		h2 {
+			font-size: 3em;
+			position: absolute;
+			top: 50%;
+			left: 50%;
+			transform: translate(-50%, -50%);
+		}
+
+		h1, h2 {
+			color: #ebebeb;
+			font-family: Avantgarde, TeX Gyre Adventor, URW Gothic L, sans-serif;
+			text-shadow: 2px 2px grey;
+			font-weight: 200;
+		}
+
+	</style>
+
+
+</head>
+<body>
+
+<div id="full-size">
+	<h1>Next meme</h1>
+	<h2>{{ next_day }}, {{ next_hour }}{{hour_type}}</h2>
+
+</div>
+</body>
+</html>
