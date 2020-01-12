@@ -7,6 +7,7 @@ import datetime
 from django.shortcuts import render
 from django.utils.crypto import random
 
+import config
 from manage import DEFAULT_SETTINGS_MODULE
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", DEFAULT_SETTINGS_MODULE)
@@ -65,41 +66,33 @@ def am_or_pm(hour):
         return hour - 12, 'PM'
 
 
-# pseudo config todo
-start_hour = 8  # todo
-end_hour = 18  # todo
-valid_days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']
-
-now = datetime.datetime.now()
-
-day = now.strftime("%A")  # todo
-day = 'Thursday'  # todo
-
-
 def index(request):
+    now = datetime.datetime.now()
+    day = now.strftime("%A")
+
     # applicable on Saturday and Sunday
-    if day not in valid_days:
+    if day not in config.valid_days:
         save_vars(0, 'None')
-        next_hour, hour_type = am_or_pm(start_hour)
-        return render(request, 'no_display.html', {'next_day': valid_days[0],
+        next_hour, hour_type = am_or_pm(config.start_hour)
+        return render(request, 'no_display.html', {'next_day': config.valid_days[0],
                                                    'next_hour': next_hour,
                                                    'hour_type': hour_type})
 
     # if Monday to Friday
     else:
         # night time to early morning
-        if now.hour < start_hour:
+        if now.hour < config.start_hour:
             save_vars(0, 'None')
-            next_hour, hour_type = am_or_pm(start_hour)
+            next_hour, hour_type = am_or_pm(config.start_hour)
             return render(request, 'no_display.html', {'next_day': day,
                                                        'next_hour': next_hour,
                                                        'hour_type': hour_type})
 
         # late afternoon
-        elif now.hour >= end_hour:
-            next_day = valid_days[(valid_days.index(day) + 1) % len(valid_days)]
+        elif now.hour >= config.end_hour:
+            next_day = config.valid_days[(config.valid_days.index(day) + 1) % len(config.valid_days)]
             save_vars(0, 'None')
-            next_hour, hour_type = am_or_pm(start_hour)
+            next_hour, hour_type = am_or_pm(config.start_hour)
             return render(request, 'no_display.html', {'next_day': next_day,
                                                        'next_hour': next_hour,
                                                        'hour_type': hour_type})
