@@ -1,3 +1,4 @@
+import logging
 import os
 
 import django
@@ -14,8 +15,16 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", DEFAULT_SETTINGS_MODULE)
 django.setup()
 from memes.models import Meme
 
+logging.basicConfig(
+    level=logging.INFO,
+    filename='memes/display_logs.log',
+    filemode='a',
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    datefmt='%d-%b-%y %H:%M:%S',
+)
 
-def save_vars(hour, post_id, filename='temp_vars.yml'):
+
+def save_vars(hour, post_id, filename='memes/temp_vars.yml'):
     """
     Saves temporary variables that will be kept during script runs. Due to this, new meme will be served every hour.
     :param hour: the hour when last meme was first loaded
@@ -30,7 +39,7 @@ def save_vars(hour, post_id, filename='temp_vars.yml'):
         yaml.dump(temp_vars, outfile, default_flow_style=False)
 
 
-def load_vars(filename='temp_vars.yml'):
+def load_vars(filename='memes/temp_vars.yml'):
     """
     Loads temporary variables that will be kept during script runs. Due to this, new meme will be served every hour.
     :param filename: name of vars file.
@@ -67,59 +76,73 @@ def am_or_pm(hour):
 
 
 def index(request):
-    now = datetime.datetime.now()
-    day = now.strftime("%A")
+    try:
+        now = datetime.datetime.now()
+        day = now.strftime("%A")
+        day = 'Monday' # todo
 
-    # applicable on Saturday and Sunday
-    if day not in config.valid_days:
-        save_vars(0, 'None')
-        next_hour, hour_type = am_or_pm(config.start_hour)
-        return render(request, 'no_display.html', {'next_day': config.valid_days[0],
-                                                   'next_hour': next_hour,
-                                                   'hour_type': hour_type})
-
-    # if Monday to Friday
-    else:
-        # night time to early morning
-        if now.hour < config.start_hour:
+        # applicable on Saturday and Sunday
+        if day not in config.valid_days:
             save_vars(0, 'None')
             next_hour, hour_type = am_or_pm(config.start_hour)
-            return render(request, 'no_display.html', {'next_day': day,
+            logging.info(f'Showing no-display page')
+            return render(request, 'no_display.html', {'next_day': config.valid_days[0],
                                                        'next_hour': next_hour,
                                                        'hour_type': hour_type})
 
-        # late afternoon
-        elif now.hour >= config.end_hour:
-            next_day = config.valid_days[(config.valid_days.index(day) + 1) % len(config.valid_days)]
-            save_vars(0, 'None')
-            next_hour, hour_type = am_or_pm(config.start_hour)
-            return render(request, 'no_display.html', {'next_day': next_day,
-                                                       'next_hour': next_hour,
-                                                       'hour_type': hour_type})
-
-        # valid display hours
+        # if Monday to Friday
         else:
-            meme = None
-            # if some memes have been already shown
-            print(os.listdir(os.curdir))
-            if os.path.exists('temp_vars.yml'):
-                prev_hour, prev_id = load_vars()
+            # night time to early morning
+            if now.hour < config.start_hour:
+                save_vars(0, 'None')
+                next_hour, hour_type = am_or_pm(config.start_hour)
+                logging.info(f'Showing no-display page')
+                return render(request, 'no_display.html', {'next_day': day,
+                                                           'next_hour': next_hour,
+                                                           'hour_type': hour_type})
 
-                # load the same meme as before if hour hasn't changed
-                if not prev_hour < now.hour:
-                    memes = Meme.objects.all().filter(valid=True).filter(post_id=prev_id)
-                    if memes:
-                        meme = memes[0]
+            # late afternoon
+            elif now.hour >= config.end_hour:
+                next_day = config.valid_days[(config.valid_days.index(day) + 1) % len(config.valid_days)]
+                save_vars(0, 'None')
+                next_hour, hour_type = am_or_pm(config.start_hour)
+                logging.info(f'Showing no-display page')
+                return render(request, 'no_display.html', {'next_day': next_day,
+                                                           'next_hour': next_hour,
+                                                           'hour_type': hour_type})
 
-            # in all other cases (no temp_vars file, new hour)
-            if not meme:
-                meme = random_meme()
+            # valid display hours
+            else:
+                meme = None
+                # if some memes have been already shown
+                if os.path.exists('memes/temp_vars.yml'):
+                    prev_hour, prev_id = load_vars()
 
-            update_count_and_save(meme)
-            save_vars(now.hour, meme.post_id)
+                    # load the same meme as before if hour hasn't changed
+                    if not prev_hour < now.hour:
+                        memes = Meme.objects.all().filter(valid=True).filter(post_id=prev_id)
+                        if memes:
+                            meme = memes[0]
+                            logging.info(f'Showing same meme as before, post_id: {meme.post_id}')
 
-            next_hour, hour_type = am_or_pm(now.hour + 1)
-            return render(request, 'display.html', {
-                'image_url': meme.image_url,
-                'next_hour': next_hour,
-                'hour_type': hour_type})
+                # in all other cases (no temp_vars file, new hour)
+                if not meme:
+                    meme = random_meme()
+                    logging.info(f'Showing new meme, post_id: {meme.post_id}')
+
+                update_count_and_save(meme)
+                save_vars(now.hour, meme.post_id)
+
+                next_hour, hour_type = am_or_pm(now.hour + 1)
+                return render(request, 'display.html', {
+                    'image_url': meme.image_url,
+                    'next_hour': next_hour,
+                    'hour_type': hour_type})
+
+    except Exception as e:
+        logging.exception("Exception occurred")
+        return render(request, 'no_display.html', {
+            'next_day': 'As soon as possible',
+            'next_hour': 'error occured :(',
+            'hour_type': ''})
+

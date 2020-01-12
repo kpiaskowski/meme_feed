@@ -17,7 +17,7 @@ from memes.models import Meme
 def update_memes(fanpages: list, num_pages: int):
     """
     Looks at FB fanpages and possibly adds new memes.
-    :param fanpages: List of fanpages..
+    :param fanpages: List of fanpages.
     :param num_pages: Number of pages of single fanpage to look.
     """
     count = 0
@@ -40,8 +40,8 @@ def update_memes(fanpages: list, num_pages: int):
                             views=0,
                             valid=True
                         )
-                        new_meme.save()
                         new_count += 1
+                        new_meme.save()
         logging.info(f'Looked at {count} posts, added {new_count} new memes')
     except Exception as e:
         logging.exception("Exception occurred")
@@ -50,7 +50,7 @@ def update_memes(fanpages: list, num_pages: int):
 if __name__ == "__main__":
     logging.basicConfig(
         level=logging.INFO,
-        filename='logs.log',
+        filename='update_logs.log',
         filemode='a',
         format='%(asctime)s - %(levelname)s - %(message)s',
         datefmt='%d-%b-%y %H:%M:%S',
