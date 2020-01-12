@@ -8,5 +8,5 @@ pages_to_search = 4
 
 # displaying
 start_hour = 7
-end_hour = 22 # todo
+end_hour = 18 # todo
 valid_days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']
