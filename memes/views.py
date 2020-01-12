@@ -79,7 +79,6 @@ def index(request):
     try:
         now = datetime.datetime.now()
         day = now.strftime("%A")
-        day = 'Monday' # todo
 
         # applicable on Saturday and Sunday
         if day not in config.valid_days:
