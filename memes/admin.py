@@ -9,8 +9,8 @@ from .models import Meme
 class MemeAdmin(admin.ModelAdmin):
     list_display = ('thumbnail', 'pub_date', 'views', 'valid',)
     list_editable = ('valid',)
-
     fields = ('views', 'thumbnail',)
+    ordering = ('-pub_date',)
 
     def thumbnail(self, obj):
         return format_html(u'<img src="%s" height="300" width="300"/>' % obj.image_url)

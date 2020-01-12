@@ -3,6 +3,7 @@
 import os
 import sys
 
+DEFAULT_SETTINGS_MODULE = 'memes_site.settings'
 
 def main():
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'memes_site.settings')
