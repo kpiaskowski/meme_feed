@@ -2,9 +2,7 @@ import os
 
 import django
 import yaml as yaml
-from django.http import HttpResponse
 import datetime
-import pickle
 
 from django.shortcuts import render
 from django.utils.crypto import random
@@ -61,7 +59,7 @@ def update_count_and_save(meme):
 
 def am_or_pm(hour):
     """Returns 24h hour in 12h format and hour specifier (am or pm)"""
-    if hour >= 0 and hour <= 12:
+    if 0 <= hour <= 12:
         return hour, 'AM'
     else:
         return hour - 12, 'PM'
@@ -69,7 +67,7 @@ def am_or_pm(hour):
 
 # pseudo config todo
 start_hour = 8  # todo
-end_hour = 12  # todo
+end_hour = 18  # todo
 valid_days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']
 
 now = datetime.datetime.now()
@@ -110,6 +108,7 @@ def index(request):
         else:
             meme = None
             # if some memes have been already shown
+            print(os.listdir(os.curdir))
             if os.path.exists('temp_vars.yml'):
                 prev_hour, prev_id = load_vars()
 
@@ -126,4 +125,8 @@ def index(request):
             update_count_and_save(meme)
             save_vars(now.hour, meme.post_id)
 
-    return HttpResponse("Hello, world. You're at the polls index.")
+            next_hour, hour_type = am_or_pm(now.hour + 1)
+            return render(request, 'display.html', {
+                'image_url': meme.image_url,
+                'next_hour': next_hour,
+                'hour_type': hour_type})

@@ -78,10 +78,10 @@
 <div id="full-size">
 	<div class="one">
 		<h1>Next meme</h1>
-		<h2>at 16PM</h2>
+		<h2>{{ next_hour }} {{hour_type}}</h2>
 	</div>
 	<div class="two">
-		<img class="meme-photo" src="meme2.png">
+		<img class="meme-photo" src={{ image_url }}>
 	</div>
 </div>
 
@@ -92,11 +92,12 @@
         var imgHeight = parseInt(img.naturalHeight);
 
         // portrait-like image
-        if (imgHeight >= imgWidth){
+        if (imgHeight >= imgWidth || imgWidth / imgHeight < 1.05){
             document.getElementsByTagName('img')[0].style.width = 'auto';
             document.getElementsByTagName('img')[0].style.height = '90%';
         }
         else{
+			console.log(imgHeight, imgWidth);
             document.getElementsByTagName('img')[0].style.height = 'auto';
             document.getElementsByTagName('img')[0].style.width = '60%';
         }
