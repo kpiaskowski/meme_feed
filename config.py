@@ -4,7 +4,8 @@ fanpages = [
     'artificialintelligencememes',
     'DeepLearningNewsAndMemes',
 ]
-pages_to_search = 4
+pages_to_search = 6
+update_interval = 12 * 3600  # 12h
 
 # displaying
 start_hour = 7

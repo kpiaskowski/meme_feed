@@ -65,13 +65,15 @@ if __name__ == "__main__":
                         help="Run continuously, update memes every hour")
     parser.add_argument('--single_run', dest='continuous_run', action='store_false',
                         help="Run single update")
+    parser.add_argument('--update_interval', default=config.update_interval,
+                        help="Run single update")
     args = parser.parse_args()
 
     if args.continuous_run:
         # could be asynchronous but meh
         while True:
             update_memes(fanpages=args.fanpages, num_pages=args.num_pages)
-            time.sleep(3600)  # run every hour
+            time.sleep(args.update_interval)  # run every 12h
 
     else:
         update_memes(fanpages=args.fanpages, num_pages=args.num_pages)
