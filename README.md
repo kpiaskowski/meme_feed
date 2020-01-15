@@ -1,3 +1,5 @@
+![Meme Feed page](meme.png)
+
 ## Description
 Welcome to meme feed. It will show you latest memes related to machine learning. It downloads memes from fanpages on facebook and displays them between 7am and 9pm, Monday to Friday. All params are located in `config.py`. 
 
